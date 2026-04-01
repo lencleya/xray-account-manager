@@ -32,8 +32,34 @@ Xray Manager даёт понятное меню, быстрые действия
 
 
 
-Скрипт для управления Xray (Reality)
-
 ## Установка
+Шаг 1: Установить git
+sudo dnf install git -y
 
-bash install.sh
+Проверить:
+git --version
+
+Шаг 2: Клонировать репозиторий
+git clone https://github.com/lencleya/xray-account-manager.git
+cd xray-account-manager
+
+После этого все файлы окажутся на сервере
+
+Шаг 3: Дать права на выполнение
+
+chmod +x install.sh
+chmod +x xray-manager.sh
+Это нужно, чтобы скрипты можно было запускать через ./install.sh
+
+Шаг 4: Запустить установку
+./install.sh
+
+Скрипт сделает всё что необходимо для  работы: создаст папки, установит Xray, проверит зависимости и т.д.
+
+
+Для обновления Обновления
+cd xray-account-manager
+git pull
+
+Подтянется последняя версия
+Можно заново запускать ./install.sh, если нужно обновить конфиги/скрипт
