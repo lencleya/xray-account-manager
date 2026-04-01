@@ -48,7 +48,7 @@ git clone https://github.com/lencleya/xray-account-manager.git && cd xray-accoun
 
 ### Шаг 3: Дать права на выполнение скриптов:
 ```bash
-chmod +x install.sh && chmod +x xray-manager.sh
+chmod +x install.sh && chmod +x uninstall.sh && chmod +x xray-manager.sh
 ```
 Это необходимо, чтобы запускать скрипты через ./install.sh
 
