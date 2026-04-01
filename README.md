@@ -40,7 +40,9 @@ sudo dnf install git -y
 git --version
 
 Шаг 2: Клонировать репозиторий
+
 git clone https://github.com/lencleya/xray-account-manager.git
+
 cd xray-account-manager
 
 После этого все файлы окажутся на сервере
@@ -48,17 +50,23 @@ cd xray-account-manager
 Шаг 3: Дать права на выполнение
 
 chmod +x install.sh
+
 chmod +x xray-manager.sh
+
 Это нужно, чтобы скрипты можно было запускать через ./install.sh
 
+
 Шаг 4: Запустить установку
+
 ./install.sh
 
 Скрипт сделает всё что необходимо для  работы: создаст папки, установит Xray, проверит зависимости и т.д.
 
 
 Для обновления Обновления
+
 cd xray-account-manager
+
 git pull
 
 Подтянется последняя версия
