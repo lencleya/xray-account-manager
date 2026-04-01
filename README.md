@@ -41,15 +41,17 @@ Xray Manager даёт понятное меню, быстрые действия
 sudo dnf install git -y
 ```
 
-# Проверка установленной версии
+Проверка установленной версии
 ```bash
 git --version
 ```
 
-2) Клонировать репозиторий:
-
-   git clone https://github.com/lencleya/xray-account-manager.git
-   cd xray-account-manager
+### Шаг 2: Клонировать репозиторий:
+```bash
+git clone https://github.com/lencleya/xray-account-manager.git
+cd xray-account-manager
+```
+   
 
    Все файлы будут скопированы на сервер.
 
