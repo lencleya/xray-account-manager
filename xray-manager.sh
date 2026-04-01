@@ -1,7 +1,7 @@
 ﻿#!/bin/bash
 # Менеджер учетных записей xray
 
-VERSION="0.3"
+VERSION="0.4"
 CONFIG_DIR="/usr/local/etc/xray"
 CONFIG="/usr/local/etc/xray/config.json"
 KEY_FILE="/usr/local/etc/xray/reality.key"
@@ -9,8 +9,7 @@ XRAY_BIN="/usr/local/bin/xray"
 SERVICE="xray"
 CLIENT_DIR="/usr/local/etc/xray/clients"
 
-TELEGRAM_TOKEN=""
-TELEGRAM_CHAT=""
+TELEGRAM_CONFIG="/usr/local/etc/xray/telegram.conf"
 
 PORT=443
 SNI="api.avito.ru"
@@ -26,6 +25,7 @@ NC='\033[0m'
 # Utils
 # =========================
 
+
 error_exit() {
     echo -e "${RED}✗ $1${NC}"
 	pause
@@ -40,6 +40,10 @@ error_message() {
 pause() {
     echo ""
     read -r -p "Нажмите Enter для продолжения..." _
+}
+success_message() {
+    echo -e "${GREEN}✓ $1${NC}"	
+	echo "";	
 }
 
 clear_if_interactive() {
@@ -130,7 +134,8 @@ check_config() {
 gen_keys_and_config() {
     require_cmd "$XRAY_BIN"
 
-    if [ -f "$CONFIG" ] || [ -f "$KEY_FILE" ]; then
+    #if [ -f "$CONFIG" ] || [ -f "$KEY_FILE" ]; then
+	if [ -f "$KEY_FILE" ]; then
         echo -e "${RED}xray уже инициализирован, файл конфигурации и файл ключей расположен ${CONFIG_DIR}${NC}"
         echo -e "${YELLOW}Для повторной инициализации, удалите файлы:${NC}"
         echo "$CONFIG"
@@ -436,8 +441,25 @@ add_client() {
     echo ""
     generate_link "$uuid" "$name"
 
-    echo ""
-    send_config_to_telegram "$name"
+   
+	# Загружаем Telegram настройки если файл существует
+	if [ -f "$TELEGRAM_CONFIG" ]; then
+		source "$TELEGRAM_CONFIG"
+	fi
+	
+	if [[ -n "${TELEGRAM_TOKEN:-}" && -n "${TELEGRAM_CHAT:-}" ]]; then
+		echo ""
+		echo "Отправка файла конфигурации в Telegram бота..."
+		send_config_to_telegram "$name"
+
+	else
+		echo ""
+		success_message "Конфиг с настроенными маршрутами и правилами сохранён в: $CLIENT_DIR/${name}.json"
+		echo "Скопируйте содержимое и вставьте в VPN клиент HAPP или аналогичные."
+		echo ""
+		echo "Чтобы включить отправку в Telegram, настройте бота через меню (пункт 9)"
+		echo ""
+	fi
 }
 
 remove_client_by_uuid() {
@@ -516,7 +538,7 @@ generate_link() {
 
     generate_qr "$link"
 
-    echo "Ссылка для подключения:"
+    echo "Ссылка для подключения без правил роутинга (все подключения идут через vpn):"
     echo "$link"
 }
 
@@ -828,32 +850,51 @@ EOF
 # =========================
 # Telegram
 # =========================
+load_telegram_config() {
+    if [ ! -f "$TELEGRAM_CONFIG" ]; then
+        echo -e "${YELLOW}⚠ Telegram не настроен (файл не найден)${NC}"
+        return 1
+    fi
+
+    source "$TELEGRAM_CONFIG"
+
+    if [[ -z "${TELEGRAM_TOKEN:-}" || -z "${TELEGRAM_CHAT:-}" ]]; then
+        echo -e "${YELLOW}⚠ TELEGRAM_TOKEN или TELEGRAM_CHAT пустые${NC}"
+        return 1
+    fi
+
+    return 0
+}
 
 send_telegram_message() {
     local text="$1"
+
     if [ -z "$text" ]; then
         echo -e "${YELLOW}⚠ Пустое сообщение${NC}"
         return 1
     fi
 
+    load_telegram_config || return 1
     require_cmd curl
 
     curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
         -d "chat_id=${TELEGRAM_CHAT}" \
         --data-urlencode "text=${text}" >/dev/null
-}
 
+    return 0
+}
 send_telegram_file() {
     local file_path="$1"
     local caption="$2"
-
-    if [ -z "$file_path" ] || [ ! -f "$file_path" ]; then
+    
+	if [ -z "$file_path" ] || [ ! -f "$file_path" ]; then
         echo -e "${YELLOW}⚠ Файл не найден: $file_path${NC}"
         return 1
     fi
 
+    load_telegram_config || return 1
     require_cmd curl
-
+	
     if [ -n "$caption" ]; then
         curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument" \
             -F "chat_id=${TELEGRAM_CHAT}" \
@@ -864,6 +905,8 @@ send_telegram_file() {
             -F "chat_id=${TELEGRAM_CHAT}" \
             -F "document=@${file_path}" >/dev/null
     fi
+
+    return 0
 }
 
 # =========================
@@ -1017,6 +1060,37 @@ show_user_stats() {
         esac
     done
 }
+add_telegram_tokens() {
+    clear_if_interactive
+
+    echo -e "${YELLOW}========== XRAY ${VERSION} MENU ==========${NC}"
+    echo ""
+    echo "Настройка Telegram бота:"
+    echo ""
+
+    read -r -p "Введите Telegram Bot Token: " token
+    read -r -p "Введите ваш Telegram Chat ID: " chat_id
+
+    # Проверка
+    if [[ -z "$token" || -z "$chat_id" ]]; then
+        error_message "Токен и Chat ID не могут быть пустыми!"
+        pause
+        return
+    fi
+
+    # Создаем файл если нет
+    sudo mkdir -p "$(dirname "$TELEGRAM_CONFIG")"
+
+# Сохраняем
+sudo bash -c "cat > $TELEGRAM_CONFIG" <<EOF
+TELEGRAM_TOKEN="$token"
+TELEGRAM_CHAT="$chat_id"
+EOF
+
+    sudo chmod 666 "$TELEGRAM_CONFIG"
+
+    success_message "Данные Telegram успешно сохранены в $TELEGRAM_CONFIG"    
+}
 
 # =========================
 # Menu
@@ -1035,6 +1109,7 @@ show_menu() {
 		echo "6) Сгенерировать QR для подключения"
 		echo "7) Перезапустить xray"
 		echo "8) Инициализация (первый запуск)"
+		echo "9) Прописать telegram token и userid"
         echo "0) Exit"
         echo ""
         read -r -p "Выберите действие: " choice
@@ -1048,6 +1123,7 @@ show_menu() {
 			6) qr_link_menu ; pause ;;
 			7) restart_xray ; pause ;;
 			8) gen_keys_and_config ; pause ;;
+			9) add_telegram_tokens ; pause ;;
             0) exit 0 ;;
             *) echo -e "${RED}Неверный пункт меню${NC}" ; pause ;;
         esac
