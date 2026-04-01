@@ -79,3 +79,17 @@ git pull
 ./install.sh
 ```
 чтобы обновить конфиги или сам менеджер.
+
+### Удаление
+
+Для удаления xray запустите команду:
+```bash
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ remove
+```
+
+Для удаления xray-manager выполните команду:
+```bash
+sudo ./uninstall.sh
+```
+
+
