@@ -95,6 +95,21 @@ format_bytes() {
     fi
     echo "${value} ${unit}"
 }
+user_online() {
+    local NAME="$1"
+    local ips=$(awk -v since="$(date -d '15 minutes ago' '+%Y/%m/%d %H:%M:%S')" '$1 " " $2 >= since && $0 ~ /'"$NAME"'/ && /accepted/ {match($0, /from ([0-9.]+):/, a); print a[1]}' /var/log/xray/access.log | sort | uniq)
+
+    if [ -n "$ips" ]; then
+        local count=$(echo "$ips" | wc -l)
+        if [ "$count" -eq 1 ]; then
+            echo -e "${GREEN}✅ $ips${NC}"  # один IP
+        else
+            local ip_list=$(echo "$ips" | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
+            echo -e "${GREEN}✅ $ip_list${NC}"
+        fi
+    fi
+}
+
 
 restart_xray() {
     systemctl restart "$SERVICE" || error_exit "Не удалось перезапустить xray"
@@ -978,17 +993,18 @@ stats_menu() {
                 max_name=$name_len
             fi
         done <<< "$clients"
-
+         
         if [ "$index" -gt 0 ]; then
-            printf "%-4s  %-*s  %-12s  %-12s\n" "" "$max_name" "Name" "Download" "Upload"
-            printf "%-4s  %-*s  %-12s  %-12s\n" "" "$max_name" "----" "--------" "------"
+            printf "%-4s  %-*s  %-12s  %-12s %-12s\n" "" "$max_name" "Name" "Download" "Upload" "Online"
+            printf "%-4s  %-*s  %-12s  %-12s %-12s\n" "" "$max_name" "----" "--------" "------" "------"
             local i
             for ((i=0; i<index; i++)); do
                 local name="${names[$i]}"
                 local up=${uplink[$name]:-0}
                 local down=${downlink[$name]:-0}
                 local num=$((i + 1))
-                printf "%-4s  %-*s  %-12s  %-12s\n" "${num})" "$max_name" "$name" "$(format_bytes "$down")" "$(format_bytes "$up")"
+				local online=$(user_online "$name")
+                printf "%-4s  %-*s  %-12s  %-12s %-12s\n" "${num})" "$max_name" "$name" "$(format_bytes "$down")" "$(format_bytes "$up")" "$online"
             done
         fi
 
