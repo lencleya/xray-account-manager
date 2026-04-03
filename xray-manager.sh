@@ -1,7 +1,7 @@
 ﻿#!/bin/bash
 # Менеджер учетных записей xray
 
-VERSION="0.4"
+VERSION="0.5"
 CONFIG_DIR="/usr/local/etc/xray"
 CONFIG="/usr/local/etc/xray/config.json"
 KEY_FILE="/usr/local/etc/xray/reality.key"
