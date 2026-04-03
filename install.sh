@@ -38,10 +38,10 @@ echo "Обнаружена ОС: $OS"
 # =========================
 if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
     PKG_MANAGER="apt"
-    INSTALL_CMD="sudo apt update && sudo apt install -y"
+    INSTALL_CMD="apt update && apt install -y"
 elif [[ "$OS" == "almalinux" || "$OS" == "centos" || "$OS" == "rocky" ]]; then
     PKG_MANAGER="dnf"
-    INSTALL_CMD="sudo dnf install -y"
+    INSTALL_CMD="dnf install -y"
 else
     echo "❌ Неподдерживаемая ОС: $OS"
     exit 1
@@ -129,7 +129,7 @@ for dir in "$CONFIG_DIR" "$CLIENT_DIR" "$XRAY_LOG_DIR"; do
         echo "✓ Директория существует: $dir"
     else
         echo "Создаём директорию: $dir"
-        sudo mkdir -p "$dir"
+           mkdir -p "$dir"
         if [ -d "$dir" ]; then
             success_message "Директория создана: $dir"
         else
@@ -148,8 +148,8 @@ if [ -f "$MANAGER_BIN" ]; then
     echo "✓ Менеджер уже скопирован: $MANAGER_BIN"
 else
     echo "Копируем менеджер в $MANAGER_BIN"
-    sudo cp xray-manager.sh "$MANAGER_BIN"
-    sudo chmod +x "$MANAGER_BIN"
+        cp xray-manager.sh "$MANAGER_BIN"
+        chmod +x "$MANAGER_BIN"
 
     if [ -f "$MANAGER_BIN" ] && [ -x "$MANAGER_BIN" ]; then
         success_message "Менеджер успешно скопирован и доступен для запуска"
@@ -166,6 +166,6 @@ echo -e "Для управления аккаунтами пользовател
 echo -e "----------------------------------------------"
 echo -e ""
 echo -e "Для удаления сервиса xray и скрипта xray-manager выполните команду:"
-echo -e 'sudo ./uninstall.sh'
+echo -e './uninstall.sh'
 
 

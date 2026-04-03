@@ -12,8 +12,24 @@ CLIENT_DIR="/usr/local/etc/xray/clients"
 TELEGRAM_CONFIG="/usr/local/etc/xray/telegram.conf"
 
 PORT=443
-SNI="api.avito.ru"
-SHORT_ID="abcdef0123456789"
+#SHORT_ID="abcdef0123456789"
+#SNI="api.avito.ru"
+
+SNI_LIST=(
+		"api.avito.ru"
+		"apple.com"
+		"eh.vk.com"
+		"github.com"
+		"m.vk.ru"
+		"microsoft.com"
+		"ozon.ru"
+		"wb.ru"
+		"www.twitch.tv"
+		"www.vk.com"
+		"ya.ru"
+		"sun6-21.userapi.com"
+		"cloudcdn-m9-12.cdn.yandex.net"		
+)
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -113,7 +129,14 @@ user_online() {
 
 restart_xray() {
     systemctl restart "$SERVICE" || error_exit "Не удалось перезапустить xray"
-    echo -e "${GREEN}✓ Xray перезапущен${NC}"
+
+    if ! systemctl is-active --quiet "$SERVICE"; then
+        echo "Логи:"
+        journalctl -u "$SERVICE" -n 20 --no-pager
+        error_exit "Xray не запустился"
+    fi
+
+    echo -e "${GREEN}✓ Xray работает${NC}"
 }
 
 check_keys() {
@@ -148,6 +171,8 @@ check_config() {
 
 gen_keys_and_config() {
     require_cmd "$XRAY_BIN"
+	
+	
 
     #if [ -f "$CONFIG" ] || [ -f "$KEY_FILE" ]; then
 	if [ -f "$KEY_FILE" ]; then
@@ -158,25 +183,51 @@ gen_keys_and_config() {
         return 1
     fi
 
-    mkdir -p "$CLIENT_DIR" "$CONFIG_DIR"
-
+    #mkdir -p "$CLIENT_DIR" "$CONFIG_DIR"
+	
+	clear_if_interactive
+	
+	echo -e "${YELLOW}========== XRAY ${VERSION} MENU ==========${NC}"
+	echo ""
     echo -e "${YELLOW}🔐 Генерация Reality ключей...${NC}"
+     
+   
     local output
     output=$($XRAY_BIN x25519)
 
     PRIVATE_KEY=$(echo "$output" | awk -F': ' '/Private/{print $2; exit}')
     PUBLIC_KEY=$(echo "$output" | awk -F': ' '/Public/{print $2; exit}')
-
+	
     if [ -z "$PRIVATE_KEY" ] || [ -z "$PUBLIC_KEY" ]; then
         error_exit "Не удалось сгенерировать ключи"
     fi
+	
+	# случайный выбор
+    #SNI=${SNI_LIST[$RANDOM % ${#SNI_LIST[@]}]}
+	
+	echo ""
+	echo "Выберите SNI для Reality:"
+	select SNI in "${SNI_LIST[@]}"; do
+		if [[ -n "$SNI" ]]; then
+			echo "Выбрано: $SNI"
+			break
+		else
+			echo "Неверный выбор, попробуйте снова"
+		fi
+	done
+	
+    SHORT_ID=$(openssl rand -hex 4)
 
     cat > "$KEY_FILE" <<EOF
 PRIVATE_KEY=$PRIVATE_KEY
 PUBLIC_KEY=$PUBLIC_KEY
+SNI=$SNI
+SHORT_ID=$SHORT_ID
 EOF
 
-    chmod 666 "$KEY_FILE"
+     touch "$KEY_FILE"
+ 
+    chmod 644 "$KEY_FILE"
     echo -e "${GREEN}✓ Ключи сохранены: $KEY_FILE${NC}"
 
     echo -e "${YELLOW}📄 Генерация дефолтного конфига: $CONFIG${NC}"
@@ -258,7 +309,7 @@ EOF
 EOF
     restart_xray
     
-	chmod 666 "$CONFIG"
+	chmod 644 "$CONFIG"
     echo -e "${GREEN}✓ Конфиг сохранён: $CONFIG${NC}"
 }
  
@@ -443,7 +494,7 @@ add_client() {
         '.inbounds[0].settings.clients += [{"id": $id, "flow": "xtls-rprx-vision", "email": $name}]' \
         "$CONFIG" > "$tmp" && mv "$tmp" "$CONFIG"
 
-    chmod 666 "$CONFIG"
+    chmod 644 "$CONFIG"
 
     echo -e "${GREEN}✓ Пользователь добавлен${NC}"
     echo "Имя: $name"
@@ -517,7 +568,7 @@ remove_client_by_uuid() {
         [ -f "$file" ] && rm -f "$file"
     fi
 
-    chmod 666 "$CONFIG"
+    chmod 644 "$CONFIG"
     restart_xray
 
     echo -e "${GREEN}✓ Пользователь удалён: $email${NC}"
@@ -541,7 +592,7 @@ generate_qr() {
 
 generate_link() {
     check_keys
-
+	
     local uuid="$1"
     local name="$2"
 
@@ -728,8 +779,10 @@ generate_client_config() {
       {
         "type": "field",
         "domain": [
-          "domain:2ip.io",
+                    "domain:2ip.io",
                     "domain:speedtest.net",
+					"cloudflare.com",
+					
                     "domain:cdninstagram.com",
                     "domain:chatgpt.com",
                     "domain:fbcdn.net",
@@ -832,7 +885,10 @@ generate_client_config() {
 					"domain:telegram-cdn.org",
 					"domain:usercontent.dev",
 					"domain:tgram.org",
-					"domain:torg.org"
+					"domain:torg.org",
+					"domain:imo.im", 
+					"domain:imoim.net",
+					"domain:kzhi.tech"
         ],
         "outboundTag": "proxy"
       },
@@ -1095,15 +1151,16 @@ add_telegram_tokens() {
     fi
 
     # Создаем файл если нет
-    sudo mkdir -p "$(dirname "$TELEGRAM_CONFIG")"
+    #mkdir -p "$(dirname "$TELEGRAM_CONFIG")"
+	touch $TELEGRAM_CONFIG
 
 # Сохраняем
-sudo bash -c "cat > $TELEGRAM_CONFIG" <<EOF
+bash -c "cat > $TELEGRAM_CONFIG" <<EOF
 TELEGRAM_TOKEN="$token"
 TELEGRAM_CHAT="$chat_id"
 EOF
 
-    sudo chmod 666 "$TELEGRAM_CONFIG"
+    chmod 644 "$TELEGRAM_CONFIG"
 
     success_message "Данные Telegram успешно сохранены в $TELEGRAM_CONFIG"    
 }
