@@ -207,6 +207,8 @@ gen_keys_and_config() {
 	
 	echo ""
 	echo "Выберите SNI для Reality:"
+	COLUMNS=1
+	PS3="Выберите домен: "
 	select SNI in "${SNI_LIST[@]}"; do
 		if [[ -n "$SNI" ]]; then
 			echo "Выбрано: $SNI"
