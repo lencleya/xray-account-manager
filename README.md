@@ -32,8 +32,10 @@ Xray Manager даёт понятное меню, быстрые действия
 ![Главное меню](screenshots/menu.png)
 
 ### Добавление пользователя
-![Добавление пользователя 1](screenshots/add-user_1.png)
-![Добавление пользователя 2](screenshots/add-user_2.png)
+![Добавление пользователя](screenshots/add-user_1.png)
+
+### Добавление пользователя
+![Добавление пользователя](screenshots/add-user_2.png)
 
 ### Статистика
 ![Статистика](screenshots/stats.png)
