@@ -8,6 +8,7 @@ MANAGER_BIN="/usr/local/bin/xray-manager"
 CONFIG_DIR="/usr/local/etc/xray"
 CLIENT_DIR="$CONFIG_DIR/clients"
 XRAY_LOG_DIR="/var/log/xray"
+LOGROTATE_CONF="/etc/logrotate.d/xray"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -117,7 +118,7 @@ fi
 install_if_missing jq
 install_if_missing qrencode
 install_if_missing curl
-
+install_if_missing logrotate
 
 # =========================
 # Проверка и создание директорий
@@ -159,6 +160,40 @@ else
 fi 
 echo ""
 
+
+
+
+echo "=== Настройка ротации логов ==="
+
+# daily          # ротация каждый день
+# rotate 7       # хранить 7 архивов (≈ неделя)
+# compress       # gzip
+# delaycompress  # сжимать со следующего дня (безопаснее)
+# missingok      # если нет логов — не падать
+# notifempty     # не трогать пустые
+# copytruncate   # важно для Xray (не перезапускаем сервис)
+
+cat > "$LOGROTATE_CONF" <<EOF
+$XRAY_LOG_DIR/*.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    dateext
+    dateformat -%Y-%m-%d
+
+}
+EOF
+
+if [ -f "$LOGROTATE_CONF" ]; then
+    success_message "Logrotate настроен: $LOGROTATE_CONF"
+else
+    error_exit "Не удалось создать конфиг logrotate"
+fi
+logrotate -d "$LOGROTATE_CONF" >/dev/null 2>&1 && success_message "Проверка logrotate прошла успешно"
 
 success_message " Установка завершена!"
 

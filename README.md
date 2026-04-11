@@ -30,13 +30,18 @@ Xray Manager даёт понятное меню, быстрые действия
 
 ### Главное меню
 ![Главное меню](screenshots/menu.png)
+Простое и понятное управление через консольное меню.
 
 ### Добавление пользователя
-![Добавление пользователя](screenshots/add_user_1.png)
-![Добавление пользователя](screenshots/add_user_2.png)
+![Добавление пользователя](screenshots/add_user__1.png)
+![Добавление пользователя](screenshots/add_user__2.png)
+
+Автоматическая генерация UUID, конфигурации и ссылки.
 
 ### Статистика
 ![Статистика](screenshots/stats.png)
+
+Отображение uplink / downlink / total по каждому пользователю.
 
 
 # XRAY Account Manager
