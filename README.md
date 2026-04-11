@@ -26,6 +26,19 @@ Xray Manager даёт понятное меню, быстрые действия
 - Тем, кто управляет небольшим числом пользователей и хочет порядок
 - Тем, кто предпочитает простую и понятную работу через меню
 
+## Скриншоты
+
+### Главное меню
+![Главное меню](screenshots/menu.png)
+
+### Добавление пользователя
+![Добавление пользователя 1](screenshots/add-user_1.png)
+![Добавление пользователя 2](screenshots/add-user_2.png)
+
+### Статистика
+![Статистика](screenshots/stats.png)
+
+
 # XRAY Account Manager
 
 ## Установка
@@ -91,5 +104,8 @@ bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release
 ```bash
 sudo ./uninstall.sh
 ```
+
+
+
 
 

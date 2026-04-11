@@ -1,7 +1,7 @@
 ﻿#!/bin/bash
 # Менеджер учетных записей xray
 
-VERSION="0.5"
+VERSION="0.51"
 CONFIG_DIR="/usr/local/etc/xray"
 CONFIG="/usr/local/etc/xray/config.json"
 KEY_FILE="/usr/local/etc/xray/reality.key"
@@ -888,9 +888,16 @@ generate_client_config() {
 					"domain:usercontent.dev",
 					"domain:tgram.org",
 					"domain:torg.org",
+					
 					"domain:imo.im", 
 					"domain:imoim.net",
-					"domain:kzhi.tech"
+					"domain:kzhi.tech",
+					
+					"domain:aistudio.google.com",
+                    "domain:gemini.google.com",
+                    "domain:generativelanguage.googleapis.com",
+                    "domain:alkalimining-pa.googleapis.com",
+                    "domain:proactivebackend-pa.googleapis.com"
         ],
         "outboundTag": "proxy"
       },
@@ -903,7 +910,9 @@ generate_client_config() {
 					"91.108.16.0/22",
 					"91.108.20.0/22",
 					"91.108.56.0/22",
-					"149.154.160.0/20"
+					"149.154.160.0/20",
+					
+					"192.12.31.0/24"
 				],
 				"outboundTag": "proxy"
 	  },
