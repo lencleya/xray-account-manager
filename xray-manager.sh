@@ -1,7 +1,6 @@
 ﻿#!/bin/bash
-# Менеджер учетных записей xray
 
-VERSION="0.51"
+VERSION="0.52"
 CONFIG_DIR="/usr/local/etc/xray"
 CONFIG="/usr/local/etc/xray/config.json"
 KEY_FILE="/usr/local/etc/xray/reality.key"
@@ -12,8 +11,6 @@ CLIENT_DIR="/usr/local/etc/xray/clients"
 TELEGRAM_CONFIG="/usr/local/etc/xray/telegram.conf"
 
 PORT=443
-#SHORT_ID="abcdef0123456789"
-#SNI="api.avito.ru"
 
 SNI_LIST=(
 		"api.avito.ru"
@@ -794,7 +791,11 @@ generate_client_config() {
                     "domain:ig.me",
                     "domain:instagram.com",
                     "domain:openai.com",
+					
                     "domain:remotedesktop.google.com",
+					"domain:googleapis.com",
+					"domain:gstatic.com",
+					"domain:chromoting.com",
                     
                     "domain:tiktok.com",
                     "domain:tiktokcdn.com",
@@ -828,9 +829,6 @@ generate_client_config() {
                     "domain:youtube-nocookie.com",
                     "domain:youtube-ui.l.google.com",
                     "domain:youtube.com",
-                    "domain:youtube.googleapis.com",
-                    "domain:youtubeembeddedplayer.googleapis.com",
-                    "domain:youtubei.googleapis.com",
                     "domain:yt-video-upload.l.google.com",
                     "domain:yt.be",
                     "domain:ytimg.com",
@@ -894,10 +892,8 @@ generate_client_config() {
 					"domain:kzhi.tech",
 					
 					"domain:aistudio.google.com",
-                    "domain:gemini.google.com",
-                    "domain:generativelanguage.googleapis.com",
-                    "domain:alkalimining-pa.googleapis.com",
-                    "domain:proactivebackend-pa.googleapis.com"
+                    "domain:gemini.google.com"
+                    
         ],
         "outboundTag": "proxy"
       },
@@ -912,7 +908,28 @@ generate_client_config() {
 					"91.108.56.0/22",
 					"149.154.160.0/20",
 					
-					"192.12.31.0/24"
+					"192.12.31.0/24", 
+					
+					"192.178.0.0/15",
+					"142.250.0.0/15",
+					"142.251.0.0/16",
+					"172.217.0.0/19",
+					"172.217.32.0/20",
+					"172.217.48.0/21",
+					"172.217.64.0/18",
+					"172.217.128.0/17",
+					"216.58.192.0/19",
+					"74.125.0.0/16",
+					"216.239.32.0/20",
+					"216.239.48.0/21",
+					"216.239.56.0/22",
+					"216.239.61.0/24",
+					"216.239.62.0/23",
+					"108.170.192.0/18",
+					"108.177.0.0/17",
+					"64.233.160.0/19",
+					"209.85.128.0/17"
+			
 				],
 				"outboundTag": "proxy"
 	  },
