@@ -1,6 +1,6 @@
 ﻿#!/bin/bash
 
-VERSION="0.52"
+VERSION="0.54"
 CONFIG_DIR="/usr/local/etc/xray"
 CONFIG="/usr/local/etc/xray/config.json"
 KEY_FILE="/usr/local/etc/xray/reality.key"
